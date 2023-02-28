@@ -7,14 +7,14 @@ import (
 )
 
 type book struct {
-	Name      string `json: "Name"`
-	Summary   string `json: "Summary"`
-	Type      string `json: "Type"`
-	Page      int    `json: "Page"`
-	Publisher string `json: "Publisher"`
-	Language  string `json: "Language"`
-	Isbn10    string `json: "Isbn10"`
-	Isbn13    string `json: "Isbn13"`
+	Name      string `json:"Name"`
+	Summary   string `json:"Summary"`
+	Type      string `json:"Type"`
+	Page      int    `json:"Page"`
+	Publisher string `json:"Publisher"`
+	Language  string `json:"Language"`
+	Isbn10    string `json:"Isbn10"`
+	Isbn13    string `json:"Isbn13"`
 }
 
 func main() {

@@ -7,8 +7,8 @@ import (
 )
 
 type ratings struct {
-	Id   int `json: "Id"`
-	Star int `json: "Star`
+	Id   int `json:"Id"`
+	Star int `json:"Star"`
 }
 
 func main() {

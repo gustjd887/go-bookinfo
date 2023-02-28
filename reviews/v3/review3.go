@@ -13,11 +13,11 @@ type ratings []struct {
 }
 
 type reviewes struct {
-	Id       int    `json: "Id"`
-	Star     int    `json: "Star`
-	Reviewer string `json: "Reviewer"`
-	Review   string `json: "Review"`
-	Color    string `json: "color"`
+	Id       int    `json:"Id"`
+	Star     int    `json:"Star"`
+	Reviewer string `json:"Reviewer"`
+	Review   string `json:"Review"`
+	Color    string `json:"color"`
 }
 
 func main() {
