@@ -49,7 +49,7 @@ func main() {
 		fmt.Printf("%s\n", string(data))
 
 		var rat ratings
-		json.Unmarshal(data, &r)
+		json.Unmarshal(data, &rat)
 
 		for _, v := range rat {
 			if v.Id == 1 {
