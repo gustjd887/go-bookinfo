@@ -21,18 +21,6 @@ type reviewes struct {
 }
 
 func main() {
-	resp, err := http.Get("http://localhost:8000/rating")
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s\n", string(data))
-
 	reviewer1 := reviewes{
 		Id:       1,
 		Star:     0,
@@ -47,25 +35,35 @@ func main() {
 		Review:   "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.",
 		Color:    "red",
 	}
-
-	var r ratings
-	json.Unmarshal(data, &r)
-
-	for _, v := range r {
-		if v.Id == 1 {
-			reviewer1.Star = v.Star
-		} else if v.Id == 2 {
-			reviewer2.Star = v.Star
-		}
-	}
-
-	reviewer := []reviewes{reviewer1, reviewer2}
-	bs, err := json.Marshal(reviewer)
-	if err != nil {
-		fmt.Println(err)
-	}
-
 	http.HandleFunc("/review", func(w http.ResponseWriter, r *http.Request) {
+		resp, err := http.Get("http://localhost:8000/rating")
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+
+		data, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("%s\n", string(data))
+
+		var rat ratings
+		json.Unmarshal(data, &r)
+
+		for _, v := range rat {
+			if v.Id == 1 {
+				reviewer1.Star = v.Star
+			} else if v.Id == 2 {
+				reviewer2.Star = v.Star
+			}
+		}
+
+		reviewer := []reviewes{reviewer1, reviewer2}
+		bs, err := json.Marshal(reviewer)
+		if err != nil {
+			fmt.Println(err)
+		}
 		w.Write(bs)
 	})
 	http.ListenAndServe(":8001", nil)
