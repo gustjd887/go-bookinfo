@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 )
+
+type Data map[string]interface{}
 
 type detail struct {
 	Name      string
@@ -27,10 +31,19 @@ type review struct {
 func main() {
 
 	http.HandleFunc("/productpage", func(w http.ResponseWriter, r *http.Request) {
-		detail := getJson("http://localhost:8002/detail")
-		review := getJson("http://localhost:8001/review")
-		w.Write(detail)
-		w.Write(review)
+		var detail detail
+		var review []review
+		json.Unmarshal(getJson("http://localhost:8002/detail"), &detail)
+		json.Unmarshal(getJson("http://localhost:8001/review"), &review)
+
+		t, _ := template.ParseFiles("index.html")
+		t.Execute(w, Data{
+			"detail": detail,
+			"review": review,
+		})
+
+		// w.Write(detail)
+		// w.Write(review)
 	})
 	http.ListenAndServe(":8003", nil)
 }
