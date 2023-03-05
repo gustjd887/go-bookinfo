@@ -34,28 +34,19 @@ func main() {
 	}
 	defer rows.Close()
 
+	rating := []ratings{}
+
 	for rows.Next() {
-		var id int
-		var star int
-		err := rows.Scan(&id, &star)
+		var r ratings
+		err := rows.Scan(&r.Id, &r.Star)
 		if err != nil {
 			panic(err)
 		}
-
-		fmt.Println(id, star)
+		rating = append(rating, r)
 	}
 
-	reviewer1 := ratings{
-		Id:   1,
-		Star: 5,
-	}
-	reviewer2 := ratings{
-		Id:   2,
-		Star: 4,
-	}
-
-	reviewer := []ratings{reviewer1, reviewer2}
-	bs, err := json.Marshal(reviewer)
+	fmt.Println(rating)
+	bs, err := json.Marshal(rating)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -64,5 +55,4 @@ func main() {
 		w.Write(bs)
 	})
 	http.ListenAndServe(":8000", nil)
-
 }
