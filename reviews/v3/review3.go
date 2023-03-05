@@ -1,13 +1,22 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
-type ratings []struct {
+const (
+	DB_USER     = "postgres"
+	DB_PASSWORD = "postgres"
+	DB_NAME     = "bookinfo"
+)
+
+type ratings struct {
 	Id   int `json:"Id"`
 	Star int `json:"Star"`
 }
@@ -21,20 +30,13 @@ type reviewes struct {
 }
 
 func main() {
-	reviewer1 := reviewes{
-		Id:       1,
-		Star:     0,
-		Reviewer: "Reviewer1",
-		Review:   "An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!",
-		Color:    "red",
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	db, err := sql.Open("postgres", dbinfo)
+	if err != nil {
+		panic(err)
 	}
-	reviewer2 := reviewes{
-		Id:       2,
-		Star:     0,
-		Reviewer: "Reviewer2",
-		Review:   "Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.",
-		Color:    "red",
-	}
+	defer db.Close()
+
 	http.HandleFunc("/review", func(w http.ResponseWriter, r *http.Request) {
 		resp, err := http.Get("http://localhost:8000/rating")
 		if err != nil {
@@ -46,21 +48,48 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%s\n", string(data))
 
-		var rat ratings
+		var rat []ratings
 		json.Unmarshal(data, &rat)
 
-		for _, v := range rat {
+		rows, err := db.Query("SELECT * FROM review")
+		if err != nil {
+			panic(err)
+		}
+		defer rows.Close()
+
+		review := []reviewes{}
+
+		for rows.Next() {
+			var r reviewes
+			err := rows.Scan(&r.Id, &r.Reviewer, &r.Review, &r.Color)
+			if err != nil {
+				panic(err)
+			}
+
+			review = append(review, r)
+		}
+
+		for i, v := range review {
 			if v.Id == 1 {
-				reviewer1.Star = v.Star
-			} else if v.Id == 2 {
-				reviewer2.Star = v.Star
+				for _, v2 := range rat {
+					if v2.Id == 1 {
+						review[i].Star = v2.Star
+						review[i].Color = "red"
+					}
+				}
+			}
+			if v.Id == 2 {
+				for _, v2 := range rat {
+					if v2.Id == 2 {
+						review[i].Star = v2.Star
+						review[i].Color = "red"
+					}
+				}
 			}
 		}
 
-		reviewer := []reviewes{reviewer1, reviewer2}
-		bs, err := json.Marshal(reviewer)
+		bs, err := json.Marshal(review)
 		if err != nil {
 			fmt.Println(err)
 		}
