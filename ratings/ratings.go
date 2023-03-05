@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -20,6 +21,30 @@ type ratings struct {
 }
 
 func main() {
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	db, err := sql.Open("postgres", dbinfo)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT * FROM rating")
+	if err != nil {
+		panic(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+		var star int
+		err := rows.Scan(&id, &star)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(id, star)
+	}
+
 	reviewer1 := ratings{
 		Id:   1,
 		Star: 5,
