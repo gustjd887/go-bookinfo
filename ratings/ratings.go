@@ -45,7 +45,6 @@ func main() {
 		rating = append(rating, r)
 	}
 
-	fmt.Println(rating)
 	bs, err := json.Marshal(rating)
 	if err != nil {
 		fmt.Println(err)
