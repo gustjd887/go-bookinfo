@@ -28,29 +28,28 @@ func main() {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT * FROM rating")
-	if err != nil {
-		panic(err)
-	}
-	defer rows.Close()
-
-	rating := []ratings{}
-
-	for rows.Next() {
-		var r ratings
-		err := rows.Scan(&r.Id, &r.Star)
+	http.HandleFunc("/rating", func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query("SELECT * FROM rating")
 		if err != nil {
 			panic(err)
 		}
-		rating = append(rating, r)
-	}
+		defer rows.Close()
 
-	bs, err := json.Marshal(rating)
-	if err != nil {
-		fmt.Println(err)
-	}
+		rating := []ratings{}
 
-	http.HandleFunc("/rating", func(w http.ResponseWriter, r *http.Request) {
+		for rows.Next() {
+			var r ratings
+			err := rows.Scan(&r.Id, &r.Star)
+			if err != nil {
+				panic(err)
+			}
+			rating = append(rating, r)
+		}
+
+		bs, err := json.Marshal(rating)
+		if err != nil {
+			fmt.Println(err)
+		}
 		w.Write(bs)
 	})
 	http.ListenAndServe(":8000", nil)

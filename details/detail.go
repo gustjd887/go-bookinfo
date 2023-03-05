@@ -1,12 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	_ "github.com/lib/pq"
 )
 
 type book struct {
+	Id        int    `json:"Id"`
 	Name      string `json:"Name"`
 	Summary   string `json:"Summary"`
 	Type      string `json:"Type"`
@@ -17,24 +21,42 @@ type book struct {
 	Isbn13    string `json:"Isbn13"`
 }
 
-func main() {
-	book1 := book{
-		Name:      "The Comedy of Errors",
-		Summary:   "The Comedy of Errors is one of William Shakespeare's early plays. It is his shortest and one of his most farcical comedies, with a major part of the humour coming from slapstick and mistaken identity, in addition to puns and word play.",
-		Type:      "paperback",
-		Page:      200,
-		Publisher: "PublisherA",
-		Language:  "English",
-		Isbn10:    "1234567890",
-		Isbn13:    "123-1234567890",
-	}
+const (
+	DB_USER     = "postgres"
+	DB_PASSWORD = "postgres"
+	DB_NAME     = "bookinfo"
+)
 
-	bs, err := json.Marshal(book1)
+func main() {
+	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable", DB_USER, DB_PASSWORD, DB_NAME)
+	db, err := sql.Open("postgres", dbinfo)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
+	defer db.Close()
 
 	http.HandleFunc("/detail", func(w http.ResponseWriter, r *http.Request) {
+		rows, err := db.Query("SELECT * FROM detail")
+		if err != nil {
+			panic(err)
+		}
+		defer rows.Close()
+
+		detail := []book{}
+
+		for rows.Next() {
+			var r book
+			err := rows.Scan(&r.Id, &r.Name, &r.Summary, &r.Type, &r.Page, &r.Publisher, &r.Language, &r.Isbn10, &r.Isbn13)
+			if err != nil {
+				panic(err)
+			}
+			detail = append(detail, r)
+		}
+
+		bs, err := json.Marshal(detail)
+		if err != nil {
+			fmt.Println(err)
+		}
 		w.Write(bs)
 	})
 	http.ListenAndServe(":8002", nil)
