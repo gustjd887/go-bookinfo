@@ -20,8 +20,8 @@
     {{with .review}}
         <h2>Book Reviews</h2>
         {{range .}}
+            <p><strong>{{.Reviewer}}</strong></p>    
             <p>{{.Review}}</p>
-            <p>{{.Reviewer}}</p>
             <p>star : {{.Star}}</p>
         {{end}}
     {{ end }}
