@@ -10,6 +10,7 @@ import (
 type Data map[string]interface{}
 
 type detail struct {
+	Id        int
 	Name      string
 	Summary   string
 	Type      string
