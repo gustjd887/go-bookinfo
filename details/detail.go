@@ -42,7 +42,8 @@ func main() {
 		}
 		defer rows.Close()
 
-		detail := []book{}
+		// detail := []book{}
+		detail := book{} // []type{}이 아니라 type{}으로 선언하여 json을 전달하려고 함.
 
 		for rows.Next() {
 			var r book
@@ -50,7 +51,8 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			detail = append(detail, r)
+			// detail = append(detail, r)
+			detail = r // rows가 한줄밖에 없기 떄문에 이렇게 처리. []json이 아니라 json type으로 전달.
 		}
 
 		bs, err := json.Marshal(detail)
